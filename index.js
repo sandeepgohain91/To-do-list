@@ -10,9 +10,9 @@ const titleInput = document.getElementById("title-input");
 const dateInput = document.getElementById("date-input");
 const descriptionInput = document.getElementById("description-input");
 
-const taskData = [];
 const taskData = JSON.parse(localStorage.getItem("data")) || [];
 let currentTask = {};
+
 const addOrUpdateTask = () => {
   const dataArrIndex = taskData.findIndex((item) => item.id === currentTask.id);
   const taskObj = {
@@ -22,73 +22,68 @@ const addOrUpdateTask = () => {
     description: descriptionInput.value,
   };
 
-   if (dataArrIndex === -1) {
+  if (dataArrIndex === -1) {
     taskData.unshift(taskObj);
-  }
-  else{
+  } else {
     taskData[dataArrIndex] = taskObj;
   }
   updateTaskContainer();
   reset();
 }
 
-const updateTaskContainer = () =>
-{   
+const updateTaskContainer = () => {
   tasksContainer.innerHTML = "";
   taskData.forEach(
     ({ id, title, date, description }) => {
-        tasksContainer.innerHTML += `
+      tasksContainer.innerHTML += `
         <div class="task" id="${id}">
           <p><strong>Title:</strong> ${title}</p>
           <p><strong>Date:</strong> ${date}</p>
           <p><strong>Description:</strong> ${description}</p>
-          <button type="button" class="btn" onclick = "editTask(this)">Edit</button>
-          <button type="button" class="btn" onclick = "deleteTask(this)">Delete</button>
+          <button type="button" class="btn" onclick="editTask(this)">Edit</button>
+          <button type="button" class="btn" onclick="deleteTask(this)">Delete</button>
         </div>
-      `
+      `;
     }
-  )
+  );
 }
 
 const deleteTask = (buttonEl) => {
-  const dataArrIndex = taskData.findIndex((item) => 
-  item.id === buttonEl.parentElement.id
-);
-buttonEl.parentElement.remove();
-taskData.splice(dataArrIndex,1);
+  const dataArrIndex = taskData.findIndex((item) =>
+    item.id === buttonEl.parentElement.id
+  );
+  buttonEl.parentElement.remove();
+  taskData.splice(dataArrIndex, 1);
 };
 
-const editTask = (buttonEl) =>{
+const editTask = (buttonEl) => {
   const dataArrIndex = taskData.findIndex((item) => item.id === buttonEl.parentElement.id);
   currentTask = taskData[dataArrIndex];
   titleInput.value = currentTask.title;
   dateInput.value = currentTask.date;
-  description.value = currentTask.description;
+  descriptionInput.value = currentTask.description;
   addOrUpdateTaskBtn.innerText = "Update Task";
-  taskForm.classList.toggle("hidden");
+  taskForm.classList.remove("hidden"); // Ensure form is visible
 };
-
 
 const reset = () => {
   addOrUpdateTaskBtn.innerText = "Add Task";
   titleInput.value = "";
   dateInput.value = "";
   descriptionInput.value = "";
-  taskForm.classList.toggle("hidden");
+  taskForm.classList.add("hidden"); // Ensure form is hidden
   currentTask = {};
 }
 
-if (taskData.length){
-  updateTaskContainer()
+if (taskData.length) {
+  updateTaskContainer();
 }
 
-openTaskFormBtn.addEventListener("click", () =>
-  taskForm.classList.toggle("hidden")
-);
+openTaskFormBtn.addEventListener("click", () => taskForm.classList.remove("hidden"));
 
 closeTaskFormBtn.addEventListener("click", () => {
   const formInputsContainValues = titleInput.value || dateInput.value || descriptionInput.value;
-  const formInputValuesUpdated = titleInput.value!== currentTask.title || dateInput.value!== currentTask.date || descriptionInput.value!== currentTask.description;
+  const formInputValuesUpdated = titleInput.value !== currentTask.title || dateInput.value !== currentTask.date || descriptionInput.value !== currentTask.description;
   if (formInputsContainValues && formInputValuesUpdated) {
     confirmCloseDialog.showModal();
   } else {
@@ -100,12 +95,13 @@ cancelBtn.addEventListener("click", () => confirmCloseDialog.close());
 
 discardBtn.addEventListener("click", () => {
   confirmCloseDialog.close();
-  reset()
+  reset();
 });
 
 taskForm.addEventListener("submit", (e) => {
   e.preventDefault();
   addOrUpdateTask();
+  localStorage.setItem("data", JSON.stringify(taskData)); // Save to localStorage
 });
 
-localStorage.setItem("data",JSON.stringify(taskData));
+localStorage.setItem("data", JSON.stringify(taskData));
